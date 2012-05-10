@@ -56,12 +56,36 @@ static gint hf_gluster_lazy = -1;
 static gint hf_gluster_label = -1;
 static gint hf_gluster_unused = -1;
 static gint hf_gluster_wd= -1;
+static gint hf_gluster_op_errstr= -1;
 
 /* Initialize the subtree pointers */
 static gint ett_gluster_cli = -1;
  static gint ett_gluster_cli_2 = -1;
 
 /* CLI Operations */
+static int
+gluster_cli_2_common_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+	offset = gluster_rpc_dissect_dict(tree, tvb, hf_gluster_dict, offset);
+        
+	return offset;
+
+}
+
+static int
+gluster_cli_2_common_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        gchar* errstr = NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_op_errstr, offset, &errstr);
+ 	offset = gluster_rpc_dissect_dict(tree, tvb, hf_gluster_dict, offset);
+        
+	return offset;
+}
 static int
 gluster_cli_2_getwd_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
@@ -209,8 +233,14 @@ static const vsff gluster_cli_2_proc[] = {
 		GLUSTER_CLI_2_GETWD, "GLUSTER_CLI_GETWD", 
                 gluster_cli_2_getwd_call, gluster_cli_2_getwd_reply
 	},
-        { GLUSTER_CLI_2_STATUS_VOLUME, "GLUSTER_CLI_STATUS_VOLUME", NULL, NULL },
-	{ GLUSTER_CLI_2_STATUS_ALL, "GLUSTER_CLI_STATUS_ALL", NULL, NULL },
+        { 	
+		GLUSTER_CLI_2_STATUS_VOLUME, "GLUSTER_CLI_STATUS_VOLUME", 
+		gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
+	{ 
+		GLUSTER_CLI_2_STATUS_ALL, "GLUSTER_CLI_STATUS_ALL", 
+	        gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
         { 
 		GLUSTER_CLI_2_MOUNT, "GLUSTER_CLI_MOUNT", 
 		gluster_cli_2_mount_call, gluster_cli_2_mount_reply
@@ -219,11 +249,27 @@ static const vsff gluster_cli_2_proc[] = {
 		GLUSTER_CLI_2_UMOUNT, "GLUSTER_CLI_UMOUNT", 
 		gluster_cli_2_umount_call, gluster_cli_2_umount_reply 
 	},
-        { GLUSTER_CLI_2_HEAL_VOLUME, "GLUSTER_CLI_HEAL_VOLUME", NULL, NULL },
-        { GLUSTER_CLI_2_STATEDUMP_VOLUME, "GLUSTER_CLI_STATEDUMP_VOLUME", NULL, NULL },
-        { GLUSTER_CLI_2_LIST_VOLUME, "GLUSTER_CLI_LIST_VOLUME", NULL, NULL},
-	{ GLUSTER_CLI_2_CLRLOCKS_VOLUME, " GLUSTER_CLI_CLRLOCKS_VOLUME", NULL, NULL },
-	{ GLUSTER_CLI_2_MAXVALUE, "GLUSTER_CLI_MAXVALUE", NULL, NULL },
+        { 
+		GLUSTER_CLI_2_HEAL_VOLUME, "GLUSTER_CLI_HEAL_VOLUME", 
+                gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
+        { 
+		GLUSTER_CLI_2_STATEDUMP_VOLUME, "GLUSTER_CLI_STATEDUMP_VOLUME", 
+                gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
+        { 
+		GLUSTER_CLI_2_LIST_VOLUME, "GLUSTER_CLI_LIST_VOLUME",
+                gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
+	{ 
+		GLUSTER_CLI_2_CLRLOCKS_VOLUME, " GLUSTER_CLI_CLRLOCKS_VOLUME",
+                gluster_cli_2_common_call,gluster_cli_2_common_reply
+	},
+	{ 
+		GLUSTER_CLI_2_MAXVALUE, "GLUSTER_CLI_MAXVALUE", 
+                gluster_cli_2_common_call,gluster_cli_2_common_reply
+
+	},
         { 0, NULL , NULL, NULL}
 };
 
@@ -325,23 +371,25 @@ proto_register_gluster_cli(void)
                                 NULL, 0, NULL, HFILL }
                 },
 		{ &hf_gluster_lazy,
-                        { "mode", "gluster.lazy", FT_UINT32, BASE_OCT,
+                        { "lazy", "gluster.lazy", FT_UINT32, BASE_OCT,
                                 NULL, 0, NULL, HFILL }
                 },
 		{ &hf_gluster_label,
-                        { "Path", "gluster.label", FT_STRING, BASE_NONE,
+                        { "Label", "gluster.label", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
                 },
 		{ &hf_gluster_unused,
-                        { "mode", "gluster.unused", FT_UINT32, BASE_OCT,
+                        { "Unused", "gluster.unused", FT_UINT32, BASE_OCT,
                                 NULL, 0, NULL, HFILL }
                 },
                 { &hf_gluster_wd,
                         { "Path", "gluster.wd", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_op_errstr,
+                        { "Errstr", "gluster.op_errstr", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
                 }
-
-
 	};
 
 
