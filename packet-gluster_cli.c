@@ -75,6 +75,23 @@ gluster_cli_2_common_call(tvbuff_t *tvb, int offset,
 }
 
 static int
+gluster_cli_2_common_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+	gchar* errstr= NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_op_errstr, offset, &errstr);
+        return offset;
+       
+ offset = gluster_rpc_dissect_dict(tree, tvb, hf_gluster_dict, offset);
+
+        return offset;
+
+}
+
+static int
 gluster_cli_2_fsm_log_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
 {
@@ -104,19 +121,6 @@ gluster_cli_2_getwd_call(tvbuff_t *tvb, int offset,
 	offset = dissect_rpc_uint32(tvb, tree, hf_gluster_unused, offset);
         return offset;
 }
-
-static int
-gluster_cli_2_getwd_reply(tvbuff_t *tvb, int offset,
-                                packet_info *pinfo _U_, proto_tree *tree)
-{
-        gchar* wd = NULL;
-
-        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
-        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
-        offset = dissect_rpc_string(tvb, tree, hf_gluster_wd, offset, &wd);
-        return offset;
-}
-
 static int
 gluster_cli_2_mount_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
