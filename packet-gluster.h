@@ -79,7 +79,6 @@
 #define GD_BRICK_PROGRAM	4867634
 /* only available in version 2 (supersedes GLUSTERFS_PROGRAM) */
 
-
 /* GD_MGMT_PROGRAM */
 enum gf_mgmt_procnum {
 	GD_MGMT_NULL = 0,
@@ -162,7 +161,7 @@ enum gluster_cli_procnum {
 
  /* GLUSTER_CLI_PROGRAM 2 */
 enum gluster_cli_2_procnum {
-        GLUSTER_CLI_2_NULL,    /* 0 */
+        GLUSTER_CLI_2_NULL = 0,    /* 0 */
         GLUSTER_CLI_2_PROBE,
         GLUSTER_CLI_2_DEPROBE,
         GLUSTER_CLI_2_LIST_FRIENDS,
@@ -223,6 +222,16 @@ enum glusterd_mgmt_procnum {
 	GLUSTERD_MGMT_FRIEND_UPDATE,
 	GLUSTERD_MGMT_MAXVALUE
 };
+/* GLUSTERD1_MGMT_PROGRAM */
+enum glusterd_mgmt_2_procnum {
+	GLUSTERD_MGMT_2_NULL = 0,    /* 0 */
+        GLUSTERD_MGMT_2_CLUSTER_LOCK,
+        GLUSTERD_MGMT_2_CLUSTER_UNLOCK,
+        GLUSTERD_MGMT_2_STAGE_OP,
+        GLUSTERD_MGMT_2_COMMIT_OP,
+        GLUSTERD_MGMT_2_MAXVALUE,
+};
+
 
 /* GLUSTERFS_PROGRAM */
 enum gf_brick_procnum {
@@ -233,7 +242,7 @@ enum gf_brick_procnum {
 	GF_BRICK_MAXVALUE
 };
 
-/* GLUSTER_HNDSK_PROGRAM */
+/* GLUSTER_HNDSK_PROGRAM  for nersion 1 and 2*/
 enum gluster_prog_hndsk_procs {
 	GF_HNDSK_NULL = 0,
 	GF_HNDSK_SETVOLUME,
@@ -321,6 +330,55 @@ enum gf_fop_procnum {
 	GFS3_OP_MAXVALUE
 };
 
+enum gf_fop_3_3procnum {
+        GFS3_3_OP_NULL,    /* 0 */
+        GFS3_3_OP_STAT,
+        GFS3_3_OP_READLINK,
+        GFS3_3_OP_MKNOD,
+        GFS3_3_OP_MKDIR,
+        GFS3_3_OP_UNLINK,
+        GFS3_3_OP_RMDIR,
+        GFS3_3_OP_SYMLINK,
+        GFS3_3_OP_RENAME,
+        GFS3_3_OP_LINK,
+        GFS3_3_OP_TRUNCATE,
+        GFS3_3_OP_OPEN,
+        GFS3_3_OP_READ,
+        GFS3_3_OP_WRITE,
+        GFS3_3_OP_STATFS,
+        GFS3_3_OP_FLUSH,
+        GFS3_3_OP_FSYNC,
+        GFS3_3_OP_SETXATTR,
+        GFS3_3_OP_GETXATTR,
+        GFS3_3_OP_REMOVEXATTR,
+        GFS3_3_OP_OPENDIR,
+        GFS3_3_OP_FSYNCDIR,
+        GFS3_3_OP_ACCESS,
+        GFS3_3_OP_CREATE,
+        GFS3_3_OP_FTRUNCATE,
+        GFS3_3_OP_FSTAT,
+        GFS3_3_OP_LK,
+        GFS3_3_OP_LOOKUP,
+	GFS3_3_OP_READDIR,
+        GFS3_3_OP_INODELK,
+        GFS3_3_OP_FINODELK,
+        GFS3_3_OP_ENTRYLK,
+        GFS3_3_OP_FENTRYLK,
+        GFS3_3_OP_XATTROP,
+        GFS3_3_OP_FXATTROP,
+        GFS3_3_OP_FGETXATTR,
+        GFS3_3_OP_FSETXATTR,
+        GFS3_3_OP_RCHECKSUM,
+        GFS3_3_OP_SETATTR,
+        GFS3_3_OP_FSETATTR,
+        GFS3_3_OP_READDIRP,
+        GFS3_3_OP_RELEASE,
+        GFS3_3_OP_RELEASEDIR,
+        GFS3_3_OP_FREMOVEXATTR,
+        GFS3_3_OP_MAXVALUE,
+} ;
+
+
 /* dir-entry types from libglusterfs/src/compat.h */
 enum gluster_entry_types {
         DT_UNKNOWN = 0,
@@ -361,7 +419,7 @@ gint proto_gluster;
 gint hf_gluster_gfid;
 gint hf_gluster_op;
 gint hf_gluster_op_ret;
-gint hf_gluster_op_errno;
+//gint hf_gluster_op_errno;
 gint hf_gluster_dict;
 
 extern int

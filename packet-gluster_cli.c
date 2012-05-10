@@ -61,6 +61,7 @@ static gint hf_gluster_name= -1;
 static gint hf_gluster_hostname = -1;
 static gint hf_gluster_port = -1;
 static gint hf_gluster_flags = -1;
+static gint hf_gluster_op_errno = -1;
 
 /* Initialize the subtree pointers */
 static gint ett_gluster_cli = -1;
@@ -543,9 +544,11 @@ proto_register_gluster_cli(void)
                 { &hf_gluster_flags,
                         { "Flags", "gluster.flag", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_op_errno,
+                        { "Errno", "gluster.op_errno", FT_INT32, BASE_DEC,
+                                NULL, 0, NULL, HFILL }
                 }
-
-
 	};
 
 

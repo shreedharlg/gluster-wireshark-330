@@ -57,7 +57,7 @@ static gint hf_gluster_key = -1;	/* FETCHSPEC Call */
 static gint hf_gluster_hndsk_event_op = -1;       /* EVENT NOTIFY call */
 static gint hf_gluster_uid = -1;              /* LOCK VERSION*/
 static gint hf_gluster_lk_ver= -1;
-
+static gint hf_gluster_op_errno = -1;
 /* for getspec */
 static gint hf_gluster_flags = -1;
 
@@ -311,8 +311,11 @@ proto_register_gluster_hndsk(void)
 		{ &hf_gluster_flags,
                         { "Flags", "gluster.flags", FT_UINT32, BASE_OCT,
                                 NULL, 0, NULL, HFILL }
-                }
- 
+                },
+		{ &hf_gluster_op_errno,
+                        { "Errno", "gluster.op_errno", FT_INT32, BASE_DEC,
+                                NULL, 0, NULL, HFILL }
+                } 
 	};
 
 	/* Setup protocol subtree array */
