@@ -57,6 +57,7 @@ static gint hf_gluster_label = -1;
 static gint hf_gluster_unused = -1;
 static gint hf_gluster_wd= -1;
 static gint hf_gluster_op_errstr= -1;
+static gint hf_gluster_name= -1;
 
 /* Initialize the subtree pointers */
 static gint ett_gluster_cli = -1;
@@ -74,18 +75,28 @@ gluster_cli_2_common_call(tvbuff_t *tvb, int offset,
 }
 
 static int
-gluster_cli_2_common_reply(tvbuff_t *tvb, int offset,
+gluster_cli_2_fsm_log_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
 {
-        gchar* errstr = NULL;
+	gchar* name = NULL;
+
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_wd, offset, &name);
+        return offset;
+}
+
+static int
+gluster_cli_2_getwd_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        gchar* wd = NULL;
 
         offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
         offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
-        offset = dissect_rpc_string(tvb, tree, hf_gluster_op_errstr, offset, &errstr);
- 	offset = gluster_rpc_dissect_dict(tree, tvb, hf_gluster_dict, offset);
-        
-	return offset;
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_wd, offset, &wd);
+        return offset;
 }
+
+
 static int
 gluster_cli_2_getwd_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
@@ -224,7 +235,11 @@ static const vsff gluster_cli_2_proc[] = {
         { GLUSTER_CLI_2_PMAP_PORTBYBRICK, "GLUSTER_CLI_PMAP_PORTBYBRICK", NULL, NULL },
         { GLUSTER_CLI_2_SYNC_VOLUME, "GLUSTER_CLI_SYNC_VOLUME", NULL, NULL },
         { GLUSTER_CLI_2_RESET_VOLUME, "GLUSTER_CLI_RESET_VOLUME", NULL, NULL },
-        { GLUSTER_CLI_2_FSM_LOG, "GLUSTER_CLI_FSM_LOG", NULL, NULL },
+        { 
+		GLUSTER_CLI_2_FSM_LOG, "GLUSTER_CLI_FSM_LOG", 
+                gluster_cli_2_fsm_log_call, gluster_cli_2_common_reply
+	
+	},
         { GLUSTER_CLI_2_GSYNC_SET, "GLUSTER_CLI_GSYNC_SET", NULL, NULL },
         { GLUSTER_CLI_2_PROFILE_VOLUME, "GLUSTER_CLI_PROFILE_VOLUME", NULL, NULL },
         { GLUSTER_CLI_2_QUOTA, "GLUSTER_CLI_QUOTA", NULL, NULL },
@@ -251,7 +266,7 @@ static const vsff gluster_cli_2_proc[] = {
 	},
         { 
 		GLUSTER_CLI_2_HEAL_VOLUME, "GLUSTER_CLI_HEAL_VOLUME", 
-                gluster_cli_2_common_call,gluster_cli_2_common_reply
+                gluster_cli_2_common_call, gluster_cli_2_common_reply
 	},
         { 
 		GLUSTER_CLI_2_STATEDUMP_VOLUME, "GLUSTER_CLI_STATEDUMP_VOLUME", 
@@ -389,7 +404,12 @@ proto_register_gluster_cli(void)
 		{ &hf_gluster_op_errstr,
                         { "Errstr", "gluster.op_errstr", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_name,
+                        { "Name", "gluster.name", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
                 }
+
 	};
 
 
