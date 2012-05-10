@@ -51,10 +51,77 @@ static gint proto_gluster_cli = -1;
 /* programs and procedures */
 static gint hf_gluster_cli_proc = -1;
 static gint hf_gluster_cli_2_proc = -1;
+static gint hf_gluster_path = -1;
+static gint hf_gluster_lazy = -1;
+static gint hf_gluster_label = -1;
+static gint hf_gluster_unused = -1;
+static gint hf_gluster_wd= -1;
 
 /* Initialize the subtree pointers */
 static gint ett_gluster_cli = -1;
  static gint ett_gluster_cli_2 = -1;
+
+/* CLI Operations */
+static int
+gluster_cli_2_getwd_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+	offset = dissect_rpc_uint32(tvb, tree, hf_gluster_unused, offset);
+        return offset;
+}
+
+static int
+gluster_cli_2_getwd_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        gchar* wd = NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_wd, offset, &wd);
+        return offset;
+}
+
+static int
+gluster_cli_2_mount_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        gchar* label = NULL;
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_label, offset, &label);
+        offset = gluster_rpc_dissect_dict(tree, tvb, hf_gluster_dict, offset);
+        return offset;
+}
+
+static int
+gluster_cli_2_mount_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        gchar* path = NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+	offset = dissect_rpc_string(tvb, tree, hf_gluster_path, offset, &path);
+        return offset;
+}
+
+static int
+gluster_cli_2_umount_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+ 	gchar* path = NULL; 
+	offset = dissect_rpc_uint32(tvb, tree,hf_gluster_lazy, offset);
+	offset = dissect_rpc_string(tvb, tree, hf_gluster_path, offset, &path);
+        return offset;
+}
+
+static int
+gluster_cli_2_umount_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        return offset;
+}
 
 
 /* procedures for GLUSTER_CLI_PROGRAM */
@@ -138,11 +205,20 @@ static const vsff gluster_cli_2_proc[] = {
         { GLUSTER_CLI_2_PROFILE_VOLUME, "GLUSTER_CLI_PROFILE_VOLUME", NULL, NULL },
         { GLUSTER_CLI_2_QUOTA, "GLUSTER_CLI_QUOTA", NULL, NULL },
        	{ GLUSTER_CLI_2_TOP_VOLUME, "GLUSTER_CLI_TOP_VOLUME", NULL, NULL },
-	{ GLUSTER_CLI_2_GETWD, "GLUSTER_CLI_GETWD", NULL, NULL },
+	{ 
+		GLUSTER_CLI_2_GETWD, "GLUSTER_CLI_GETWD", 
+                gluster_cli_2_getwd_call, gluster_cli_2_getwd_reply
+	},
         { GLUSTER_CLI_2_STATUS_VOLUME, "GLUSTER_CLI_STATUS_VOLUME", NULL, NULL },
 	{ GLUSTER_CLI_2_STATUS_ALL, "GLUSTER_CLI_STATUS_ALL", NULL, NULL },
-        { GLUSTER_CLI_2_MOUNT, "GLUSTER_CLI_MOUNT", NULL, NULL },
-        { GLUSTER_CLI_2_UMOUNT, "GLUSTER_CLI_UMOUNT", NULL, NULL },
+        { 
+		GLUSTER_CLI_2_MOUNT, "GLUSTER_CLI_MOUNT", 
+		gluster_cli_2_mount_call, gluster_cli_2_mount_reply
+	},
+        { 
+		GLUSTER_CLI_2_UMOUNT, "GLUSTER_CLI_UMOUNT", 
+		gluster_cli_2_umount_call, gluster_cli_2_umount_reply 
+	},
         { GLUSTER_CLI_2_HEAL_VOLUME, "GLUSTER_CLI_HEAL_VOLUME", NULL, NULL },
         { GLUSTER_CLI_2_STATEDUMP_VOLUME, "GLUSTER_CLI_STATEDUMP_VOLUME", NULL, NULL },
         { GLUSTER_CLI_2_LIST_VOLUME, "GLUSTER_CLI_LIST_VOLUME", NULL, NULL},
@@ -243,7 +319,28 @@ proto_register_gluster_cli(void)
                 { &hf_gluster_cli_2_proc,
                         { "Gluster CLI", "gluster.cli", FT_UINT32, BASE_DEC,
                                 VALS(gluster_cli_2_proc_vals), 0, NULL, HFILL }
+                },
+		{ &hf_gluster_path,
+                        { "Path", "gluster.path", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_lazy,
+                        { "mode", "gluster.lazy", FT_UINT32, BASE_OCT,
+                                NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_label,
+                        { "Path", "gluster.label", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
+                },
+		{ &hf_gluster_unused,
+                        { "mode", "gluster.unused", FT_UINT32, BASE_OCT,
+                                NULL, 0, NULL, HFILL }
+                },
+                { &hf_gluster_wd,
+                        { "Path", "gluster.wd", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
                 }
+
 
 	};
 
