@@ -56,12 +56,39 @@ static gint hf_gluster_lazy = -1;
 static gint hf_gluster_label = -1;
 static gint hf_gluster_unused = -1;
 static gint hf_gluster_wd= -1;
+static gint hf_gluster_hostname = -1;
+static gint hf_gluster_port = -1;
+
 
 /* Initialize the subtree pointers */
 static gint ett_gluster_cli = -1;
  static gint ett_gluster_cli_2 = -1;
 
 /* CLI Operations */
+
+static int
+gluster_cli_2_probe_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+        
+        gchar* hostname = NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_port, offset);
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_hostname, offset, &hostname);
+}
+static int
+gluster_cli_2_probe_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+
+        gchar* hostname = NULL;
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_hostname, offset, &hostname);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_port, offset);
+
+}
+
 static int
 gluster_cli_2_getwd_call(tvbuff_t *tvb, int offset,
                                 packet_info *pinfo _U_, proto_tree *tree)
@@ -180,7 +207,12 @@ static const vsff gluster_cli_proc[] = {
 /* procedures for GLUSTER_CLI_PROGRAM  version 2*/
 static const vsff gluster_cli_2_proc[] = {
         { GLUSTER_CLI_2_NULL, "GLUSTER_CLI_NULL", NULL, NULL },
-        { GLUSTER_CLI_2_PROBE, "GLUSTER_CLI_PROBE", NULL, NULL },
+       
+        {
+                GLUSTER_CLI_2_PROBE, "GLUSTER_CLI_PROBE",
+                gluster_cli_2_probe_call, gluster_cli_2_probe_reply
+        },
+
         { GLUSTER_CLI_2_DEPROBE, "GLUSTER_CLI_DEPROBE", NULL, NULL },
         { GLUSTER_CLI_2_LIST_FRIENDS, "GLUSTER_CLI_LIST_FRIENDS", NULL, NULL },
         { GLUSTER_CLI_2_CREATE_VOLUME, "GLUSTER_CLI_CREATE_VOLUME" , NULL, NULL},
@@ -338,6 +370,14 @@ proto_register_gluster_cli(void)
                 },
                 { &hf_gluster_wd,
                         { "Path", "gluster.wd", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
+                },
+                { &hf_gluster_hostname,
+                        { "Hostname", "gluster.hostname", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
+                },
+                { &hf_gluster_port,
+                        { "Port", "gluster.port", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
                 }
 
