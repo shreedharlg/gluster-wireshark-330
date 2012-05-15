@@ -58,6 +58,8 @@ static gint hf_gluster_unused = -1;
 static gint hf_gluster_wd= -1;
 static gint hf_gluster_hostname = -1;
 static gint hf_gluster_port = -1;
+static gint hf_gluster_flags = -1;
+
 
 
 /* Initialize the subtree pointers */
@@ -86,6 +88,30 @@ gluster_cli_2_probe_call(tvbuff_t *tvb, int offset,
         gchar* hostname = NULL;
         offset = dissect_rpc_string(tvb, tree, hf_gluster_hostname, offset, &hostname);
         offset = dissect_rpc_uint32(tvb, tree, hf_gluster_port, offset);
+
+}
+
+static int
+gluster_cli_2_deprobe_reply(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+
+        gchar* hostname = NULL;
+
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_ret, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_op_errno, offset);
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_hostname, offset, &hostname);
+}
+
+static int
+gluster_cli_2_deprobe_call(tvbuff_t *tvb, int offset,
+                                packet_info *pinfo _U_, proto_tree *tree)
+{
+
+        gchar* hostname = NULL;
+        offset = dissect_rpc_string(tvb, tree, hf_gluster_hostname, offset, &hostname);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_port, offset);
+        offset = dissect_rpc_uint32(tvb, tree, hf_gluster_flags, offset);
 
 }
 
@@ -204,6 +230,7 @@ static const vsff gluster_cli_proc[] = {
 	{ 0, NULL, NULL, NULL }
 }; 
 
+
 /* procedures for GLUSTER_CLI_PROGRAM  version 2*/
 static const vsff gluster_cli_2_proc[] = {
         { GLUSTER_CLI_2_NULL, "GLUSTER_CLI_NULL", NULL, NULL },
@@ -213,7 +240,10 @@ static const vsff gluster_cli_2_proc[] = {
                 gluster_cli_2_probe_call, gluster_cli_2_probe_reply
         },
 
-        { GLUSTER_CLI_2_DEPROBE, "GLUSTER_CLI_DEPROBE", NULL, NULL },
+        {
+                GLUSTER_CLI_2_DEPROBE, "GLUSTER_CLI_DEPROBE",
+                gluster_cli_2_deprobe_call, gluster_cli_2_deprobe_reply
+        },
         { GLUSTER_CLI_2_LIST_FRIENDS, "GLUSTER_CLI_LIST_FRIENDS", NULL, NULL },
         { GLUSTER_CLI_2_CREATE_VOLUME, "GLUSTER_CLI_CREATE_VOLUME" , NULL, NULL},
         { GLUSTER_CLI_2_GET_VOLUME, "GLUSTER_CLI_GET_VOLUME", NULL, NULL },
@@ -379,7 +409,12 @@ proto_register_gluster_cli(void)
                 { &hf_gluster_port,
                         { "Port", "gluster.port", FT_STRING, BASE_NONE,
                                 NULL, 0, NULL, HFILL }
+                },
+                { &hf_gluster_flags,
+                        { "Flags", "gluster.flag", FT_STRING, BASE_NONE,
+                                NULL, 0, NULL, HFILL }
                 }
+
 
 
 	};
