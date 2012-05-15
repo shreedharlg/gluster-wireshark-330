@@ -79,6 +79,7 @@
 #define GD_BRICK_PROGRAM	4867634
 /* only available in version 2 (supersedes GLUSTERFS_PROGRAM) */
 
+
 /* GD_MGMT_PROGRAM */
 enum gf_mgmt_procnum {
 	GD_MGMT_NULL = 0,
